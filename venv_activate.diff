@@ -1,0 +1,57 @@
+--- activate.orig	2019-12-20 09:22:36.000000000 -0500
++++ activate	2019-12-20 11:06:23.000000000 -0500
+@@ -27,6 +27,12 @@
+         unset _OLD_VIRTUAL_PS1
+     fi
+ 
++    if [ -n "${_OLD_VIRTUAL_PROMPT_COMMAND:-}" ] ; then
++        PROMPT_COMMAND="${_OLD_VIRTUAL_PROMPT_COMMAND:-}"
++	export PROMPT_COMMAND
++	unset _OLD_VIRTUAL_PROMPT_COMMAND
++    fi
++
+     unset VIRTUAL_ENV
+     if [ ! "${1:-}" = "nondestructive" ] ; then
+     # Self destruct!
+@@ -34,6 +40,28 @@
+     fi
+ }
+ 
++__new_prompt_command () {
++    # This function exists because the args get split as needed.
++    # There may be a better solution?
++    # It seems to work for __git_ps1
++    if [ "$1" = "__git_ps1" ] ; then
++        cmd=$1
++        shift
++        arg1=$1
++        shift
++
++        # Strip any leading/trailing quotes from arg1
++        # https://stackoverflow.com/a/9733456
++        arg1="${arg1%\"}"
++        arg1="${arg1#\"}"
++        arg1="(`basename \"$VIRTUAL_ENV\"`)$arg1"
++
++        echo "$cmd \"$arg1\" $*"
++    else
++        echo "$*"
++    fi
++}
++
+ # unset irrelevant variables
+ deactivate nondestructive
+ 
+@@ -66,6 +94,12 @@
+     fi
+     fi
+     export PS1
++
++    if [ -n "${PROMPT_COMMAND:-}" ] ; then
++        _OLD_VIRTUAL_PROMPT_COMMAND="$PROMPT_COMMAND"
++	PROMPT_COMMAND=$(__new_prompt_command $PROMPT_COMMAND)
++	export PROMPT_COMMAND
++    fi
+ fi
+ 
+ # This should detect bash and zsh, which have a hash command that must
